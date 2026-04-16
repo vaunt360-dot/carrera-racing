@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { Driver, RaceDayDetail } from '@/lib/types'
 import { Cup, CUPS, CUP_LABELS } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
-import { getPoints } from '@/lib/calculations'
 
 type ResultEntry = {
   position: string
@@ -80,7 +79,6 @@ export function EditRaceDayForm({ raceDay, drivers }: EditRaceDayFormProps) {
           race_number: 1 | 2
           position: number | null
           dns: boolean
-          points: number
         }[] = []
 
         drivers.forEach(driver => {
@@ -88,7 +86,6 @@ export function EditRaceDayForm({ raceDay, drivers }: EditRaceDayFormProps) {
             ([1, 2] as const).forEach(raceNum => {
               const entry = matrix[driver.id][`${cup}_${raceNum}`]
               const position = entry.dns ? null : (parseInt(entry.position) || null)
-              const points = getPoints(position, entry.dns)
               results.push({
                 race_day_id: raceDay.id,
                 driver_id: driver.id,
@@ -96,7 +93,6 @@ export function EditRaceDayForm({ raceDay, drivers }: EditRaceDayFormProps) {
                 race_number: raceNum,
                 position,
                 dns: entry.dns,
-                points,
               })
             })
           })
@@ -152,7 +148,7 @@ export function EditRaceDayForm({ raceDay, drivers }: EditRaceDayFormProps) {
       </div>
 
       {/* Results per cup */}
-      {!cancelled && CUPS.map(cup => (
+      {!cancelled && CUPS.filter(cup => !(cup === 'classic' && raceDay.round_number === 1)).map(cup => (
         <div key={cup} className="glass-panel overflow-hidden">
           <div className="p-5 border-b border-white/10">
             <h2 className="font-display text-xl text-white">{CUP_LABELS[cup]}</h2>

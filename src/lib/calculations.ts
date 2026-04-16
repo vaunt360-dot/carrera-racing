@@ -3,32 +3,37 @@
 // ============================================================
 // RULES:
 //  - 20 race days total, April 2026 – November 2027
-//  - Each day: 4 races (NASCAR R1, NASCAR R2, Classic R1, Classic R2)
+//  - Each day: NASCAR R1, NASCAR R2 (all rounds) + Classic R1, Classic R2 (from round 2)
 //  - Points: 1st=8, 2nd=6, 3rd=4, 4th=3, 5th=2, 6th=1, DNS=0
-//  - Standings: best 15 of 20 days count
-//  - DROPS: 5 worst days are dropped (based on SUM of all 4 races per day)
+//  - Standings: best 15 of 20 days count PER CUP independently
+//  - DROPS: each cup drops its own 5 worst cup-days (based on that cup's total per day)
 //  - DYNAMIC: drops are applied from race day 16 onward
 //    (days 1–15: no drops; day 16: drop 1; day 17: drop 2; …; day 20: drop 5)
-//  - Nascar & Classic Cup are SEPARATE championships
-//  - Both cups share the same dropped days (calculated from combined 4-race total)
+//  - NASCAR & Classic Cup are fully independent championships with independent drops
 // ============================================================
 
 import { Driver, RaceDay, RaceResult, DriverDayResult, DriverStanding, CupStandings } from './types'
-import { Cup, COUNTED_RACE_DAYS, TOTAL_RACE_DAYS } from './constants'
+import { Cup, COUNTED_RACE_DAYS } from './constants'
 
 /**
- * Calculate which race days are dropped for a given driver
- * based on the combined 4-race total per day.
+ * Calculate which race days are dropped for a given driver in a specific cup.
+ * Drops are based on that cup's total per day (not combined 4-race total).
  */
 export function getDroppedDayIds(
   dayResults: DriverDayResult[],
-  completedDays: number
+  completedDays: number,
+  cup: Cup
 ): Set<string> {
-  // Only start dropping from day 16 onwards
   const toDrop = Math.max(0, completedDays - COUNTED_RACE_DAYS)
   if (toDrop === 0) return new Set()
 
-  const sorted = [...dayResults].sort((a, b) => a.dayTotal - b.dayTotal)
+  const cupTotal = (d: DriverDayResult) => cup === 'nascar' ? d.nascarTotal : d.classicTotal
+
+  // Only consider days that have cup results (e.g. Classic has no results in round 1)
+  const sorted = [...dayResults]
+    .filter(d => cupTotal(d) > 0 || d.cancelled)
+    .sort((a, b) => cupTotal(a) - cupTotal(b))
+
   return new Set(sorted.slice(0, toDrop).map(d => d.raceDayId))
 }
 
@@ -72,7 +77,7 @@ export function buildDriverDayResults(
 }
 
 /**
- * Calculate cup standings with drop logic applied
+ * Calculate cup standings with cup-independent drop logic applied
  */
 export function calculateCupStandings(
   cup: Cup,
@@ -80,14 +85,16 @@ export function calculateCupStandings(
   raceDays: RaceDay[],
   results: RaceResult[]
 ): CupStandings {
-  // Count completed race days (have at least one result)
-  const completedDayIds = new Set(results.map(r => r.race_day_id))
-  const completedDays = raceDays.filter(d => completedDayIds.has(d.id)).length
+  // Count completed race days that have results for this specific cup
+  const cupResultDayIds = new Set(
+    results.filter(r => r.cup === cup).map(r => r.race_day_id)
+  )
+  const completedDays = raceDays.filter(d => cupResultDayIds.has(d.id)).length
   const activeDroppingCount = Math.max(0, completedDays - COUNTED_RACE_DAYS)
 
   const standings: DriverStanding[] = drivers.map(driver => {
     const dayResults = buildDriverDayResults(driver.id, raceDays, results)
-    const droppedDayIds = getDroppedDayIds(dayResults, completedDays)
+    const droppedDayIds = getDroppedDayIds(dayResults, completedDays, cup)
 
     // Cup points: only non-dropped days
     const cupPoints = dayResults
@@ -149,7 +156,7 @@ export function calculateAllStandings(
 
 /**
  * Get season progression data for charts
- * Returns cumulative points after each race day (with drops applied at that point in time)
+ * Returns cumulative points after each race day (with cup-specific drops applied)
  */
 export function getSeasonProgression(
   cup: Cup,
@@ -159,16 +166,15 @@ export function getSeasonProgression(
 ): Array<{ round: number; date: string; points: number; isDropped: boolean }> {
   const dayResults = buildDriverDayResults(driver.id, raceDays, results)
 
-  // For each completed day, simulate what the standings would have been
   const progression: Array<{ round: number; date: string; points: number; isDropped: boolean }> = []
 
-  const completedDayIds = new Set(results.map(r => r.race_day_id))
-  const completedDays = raceDays.filter(d => completedDayIds.has(d.id))
+  const cupResultDayIds = new Set(results.filter(r => r.cup === cup).map(r => r.race_day_id))
+  const completedDays = raceDays.filter(d => cupResultDayIds.has(d.id))
 
   completedDays.forEach((_, idx) => {
     const daysUpToNow = dayResults.slice(0, idx + 1)
     const completedCount = daysUpToNow.length
-    const droppedIds = getDroppedDayIds(daysUpToNow, completedCount)
+    const droppedIds = getDroppedDayIds(daysUpToNow, completedCount, cup)
 
     const points = daysUpToNow
       .filter(d => !droppedIds.has(d.raceDayId))
