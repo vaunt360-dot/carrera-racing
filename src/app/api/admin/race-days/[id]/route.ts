@@ -16,6 +16,7 @@ interface PutBody {
   results: ResultPayload[]
   cancelled: boolean
   notes: string
+  date?: string
 }
 
 export async function PUT(
@@ -38,12 +39,15 @@ export async function PUT(
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const { results, cancelled, notes } = body
+  const { results, cancelled, notes, date } = body
 
   // Update race day
+  const updatePayload: Record<string, unknown> = { cancelled, notes: notes || null }
+  if (date) updatePayload.date = date
+
   const { error: rdError } = await supabase
     .from('race_days')
-    .update({ cancelled, notes: notes || null })
+    .update(updatePayload)
     .eq('id', id)
 
   if (rdError) {

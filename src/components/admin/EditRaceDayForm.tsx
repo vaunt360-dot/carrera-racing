@@ -50,6 +50,7 @@ export function EditRaceDayForm({ raceDay, drivers }: EditRaceDayFormProps) {
   const [matrix, setMatrix] = useState<ResultsMatrix>(() => buildInitialMatrix(drivers, raceDay))
   const [cancelled, setCancelled] = useState(raceDay.cancelled)
   const [notes, setNotes] = useState(raceDay.notes ?? '')
+  const [date, setDate] = useState(raceDay.date ?? '')
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState('')
 
@@ -132,7 +133,7 @@ export function EditRaceDayForm({ raceDay, drivers }: EditRaceDayFormProps) {
         const response = await fetch(`/api/admin/race-days/${raceDay.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ results, cancelled, notes }),
+          body: JSON.stringify({ results, cancelled, notes, date }),
         })
 
         if (!response.ok) {
@@ -175,6 +176,17 @@ export function EditRaceDayForm({ raceDay, drivers }: EditRaceDayFormProps) {
           onChange={e => setNotes(e.target.value)}
           placeholder="Optional..."
           className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-white/20 focus:outline-none focus:border-racing-red transition-colors text-sm"
+        />
+      </div>
+
+      {/* Date */}
+      <div className="glass-panel p-5">
+        <label className="block text-white/50 text-xs font-mono uppercase tracking-wider mb-2">Datum</label>
+        <input
+          type="date"
+          value={date}
+          onChange={e => setDate(e.target.value)}
+          className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-racing-red transition-colors text-sm [color-scheme:dark]"
         />
       </div>
 
