@@ -65,35 +65,21 @@ export function StandingsSummary({ standings }: StandingsSummaryProps) {
                         key={ds.driver.id}
                         className={`flex items-center gap-4 p-3 rounded-lg ${i === 0 ? 'bg-white/10' : 'bg-white/5'}`}
                       >
-                        {/* Position */}
                         <span className="font-display text-xl w-6 text-center" style={{ color: i === 0 ? '#FFD600' : 'rgba(255,255,255,0.4)' }}>
                           {i + 1}
                         </span>
-
-                        {/* Color dot */}
-                        <div
-                          className="w-3 h-3 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: ds.driver.color }}
-                        />
-
-                        {/* Name + Number */}
+                        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: ds.driver.color }} />
                         <div className="flex-1">
                           <span className="text-white font-semibold">{ds.driver.name}</span>
                           <span className="text-white/30 text-xs ml-2 font-mono">#{ds.driver.number}</span>
                         </div>
-
-                        {/* Points */}
                         <div className="text-right">
                           <span className="text-white font-display text-xl">{ds.cupPoints}</span>
                           <span className="text-white/40 text-xs ml-1">Pkt</span>
                         </div>
-
-                        {/* Gap */}
-                        {i > 0 && leader && (
-                          <span className="text-white/30 text-xs font-mono w-12 text-right">
-                            -{leader.cupPoints - ds.cupPoints}
-                          </span>
-                        )}
+                        <span className="text-white/30 text-xs font-mono w-12 text-right">
+                          {i > 0 && leader ? `-${leader.cupPoints - ds.cupPoints}` : ''}
+                        </span>
                       </div>
                     ))}
 
@@ -103,9 +89,15 @@ export function StandingsSummary({ standings }: StandingsSummaryProps) {
                         {driverStandings.slice(3).map((ds) => (
                           <div key={ds.driver.id} className="flex items-center gap-4 px-3 py-1">
                             <span className="text-white/30 font-display text-sm w-6 text-center">{ds.position}</span>
-                            <div className="w-3 h-3 rounded-full flex-shrink-0 opacity-60" style={{ backgroundColor: ds.driver.color }} />
+                            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: ds.driver.color }} />
                             <span className="text-white/60 text-sm flex-1">{ds.driver.name}</span>
-                            <span className="text-white/60 text-sm font-display">{ds.cupPoints}</span>
+                            <div className="text-right">
+                              <span className="text-white/60 text-sm font-display">{ds.cupPoints}</span>
+                              <span className="text-white/40 text-xs ml-1">Pkt</span>
+                            </div>
+                            <span className="text-white/30 text-xs font-mono w-12 text-right">
+                              {leader ? `-${leader.cupPoints - ds.cupPoints}` : ''}
+                            </span>
                           </div>
                         ))}
                       </div>
