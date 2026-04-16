@@ -8,15 +8,22 @@ export const metadata = {
 }
 
 export default async function DriversPage() {
-  const [drivers, standings] = await Promise.all([
-    getDrivers(),
-    getAllStandings(),
-  ])
+  let drivers: Awaited<ReturnType<typeof getDrivers>> = []
+  let standings: Awaited<ReturnType<typeof getAllStandings>> | null = null
+
+  try {
+    ;[drivers, standings] = await Promise.all([
+      getDrivers(),
+      getAllStandings(),
+    ])
+  } catch (err) {
+    console.error('DriversPage fetch error:', err)
+  }
 
   // Build quick stats per driver
   const driverStats = drivers.map(driver => {
-    const nascarStanding = standings.nascar.standings.find(s => s.driver.id === driver.id)
-    const classicStanding = standings.classic.standings.find(s => s.driver.id === driver.id)
+    const nascarStanding = standings?.nascar.standings.find(s => s.driver.id === driver.id)
+    const classicStanding = standings?.classic.standings.find(s => s.driver.id === driver.id)
     return {
       driver,
       nascarPos: nascarStanding?.position ?? 0,
