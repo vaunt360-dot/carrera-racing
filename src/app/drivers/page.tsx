@@ -1,7 +1,7 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { getDrivers, getAllStandings } from '@/lib/actions'
 import { CUP_LABELS } from '@/lib/constants'
+import DriverImage from '@/components/drivers/DriverImage'
 
 export const metadata = {
   title: 'Fahrer | Carrera Racing Club',
@@ -60,13 +60,7 @@ export default async function DriversPage() {
 
               {/* Driver Image */}
               <div className="relative aspect-square overflow-hidden">
-                <Image
-                  src={`/images/drivers/${driver.name.toLowerCase()}.jpg`}
-                  alt={driver.name}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  onError={() => {}} // graceful fallback handled by Next.js
-                />
+                <DriverImage name={driver.name} color={driver.color} number={driver.number} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
                 {/* Number overlay */}
