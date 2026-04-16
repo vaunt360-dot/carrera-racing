@@ -52,7 +52,8 @@ export function buildDriverDayResults(
 
     const get = (cup: Cup, raceNumber: 1 | 2): number => {
       const r = dayResults.find(r => r.cup === cup && r.race_number === raceNumber)
-      return r ? r.points : 0
+      if (!r) return 0
+      return r.points + (r.pole ? 1 : 0)
     }
 
     const nascarR1 = get('nascar', 1)

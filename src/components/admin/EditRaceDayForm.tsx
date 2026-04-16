@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 type ResultEntry = {
   position: string
   dns: boolean
+  pole: boolean
 }
 
 type ResultsMatrix = {
@@ -30,6 +31,7 @@ function buildInitialMatrix(drivers: Driver[], raceDay: RaceDayDetail): ResultsM
         matrix[driver.id][key] = {
           position: existing?.position?.toString() ?? '',
           dns: existing?.dns ?? false,
+          pole: existing?.pole ?? false,
         }
       })
     })
@@ -51,7 +53,7 @@ export function EditRaceDayForm({ raceDay, drivers }: EditRaceDayFormProps) {
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState('')
 
-  function setEntry(driverId: string, cup: Cup, raceNum: 1 | 2, field: 'position' | 'dns', value: string | boolean) {
+  function setEntry(driverId: string, cup: Cup, raceNum: 1 | 2, field: 'position' | 'dns' | 'pole', value: string | boolean) {
     setMatrix(prev => ({
       ...prev,
       [driverId]: {
@@ -59,11 +61,39 @@ export function EditRaceDayForm({ raceDay, drivers }: EditRaceDayFormProps) {
         [`${cup}_${raceNum}`]: {
           ...prev[driverId][`${cup}_${raceNum}`],
           [field]: value,
-          // If DNS checked, clear position
-          ...(field === 'dns' && value === true ? { position: '' } : {}),
+          // If DNS checked, clear position and pole
+          ...(field === 'dns' && value === true ? { position: '', pole: false } : {}),
         },
       },
     }))
+  }
+
+  // Only one driver can have pole per race — when pole is set, clear others
+  function setPole(driverId: string, cup: Cup, raceNum: 1 | 2, checked: boolean) {
+    setMatrix(prev => {
+      const next = { ...prev }
+      // Clear pole for all drivers in this race
+      Object.keys(next).forEach(id => {
+        next[id] = {
+          ...next[id],
+          [`${cup}_${raceNum}`]: {
+            ...next[id][`${cup}_${raceNum}`],
+            pole: false,
+          },
+        }
+      })
+      // Set pole for selected driver
+      if (checked) {
+        next[driverId] = {
+          ...next[driverId],
+          [`${cup}_${raceNum}`]: {
+            ...next[driverId][`${cup}_${raceNum}`],
+            pole: true,
+          },
+        }
+      }
+      return next
+    })
   }
 
   async function handleSave() {
@@ -71,7 +101,6 @@ export function EditRaceDayForm({ raceDay, drivers }: EditRaceDayFormProps) {
     setSaved(false)
     startTransition(async () => {
       try {
-        // Build results array
         const results: {
           race_day_id: string
           driver_id: string
@@ -79,6 +108,7 @@ export function EditRaceDayForm({ raceDay, drivers }: EditRaceDayFormProps) {
           race_number: 1 | 2
           position: number | null
           dns: boolean
+          pole: boolean
         }[] = []
 
         drivers.forEach(driver => {
@@ -93,6 +123,7 @@ export function EditRaceDayForm({ raceDay, drivers }: EditRaceDayFormProps) {
                 race_number: raceNum,
                 position,
                 dns: entry.dns,
+                pole: entry.pole,
               })
             })
           })
@@ -160,7 +191,7 @@ export function EditRaceDayForm({ raceDay, drivers }: EditRaceDayFormProps) {
                 <tr className="border-b border-white/5">
                   <th className="text-left p-4 text-white/40 font-mono text-xs w-36">Fahrer</th>
                   {[1, 2].map(raceNum => (
-                    <th key={raceNum} colSpan={2} className="text-center p-4 text-white/40 font-mono text-xs border-l border-white/5">
+                    <th key={raceNum} colSpan={3} className="text-center p-4 text-white/40 font-mono text-xs border-l border-white/5">
                       Rennen {raceNum}
                     </th>
                   ))}
@@ -170,7 +201,8 @@ export function EditRaceDayForm({ raceDay, drivers }: EditRaceDayFormProps) {
                   {[1, 2].map(raceNum => (
                     <>
                       <th key={`${raceNum}-pos`} className="p-3 text-white/30 font-mono text-xs border-l border-white/5 w-24">Position</th>
-                      <th key={`${raceNum}-dns`} className="p-3 text-white/30 font-mono text-xs w-16">DNS</th>
+                      <th key={`${raceNum}-pole`} className="p-3 text-yellow-400/60 font-mono text-xs w-14">Pole</th>
+                      <th key={`${raceNum}-dns`} className="p-3 text-white/30 font-mono text-xs w-14">DNS</th>
                     </>
                   ))}
                 </tr>
@@ -200,6 +232,15 @@ export function EditRaceDayForm({ raceDay, drivers }: EditRaceDayFormProps) {
                                 <option key={p} value={p.toString()}>P{p}</option>
                               ))}
                             </select>
+                          </td>
+                          <td key={`${raceNum}-pole`} className="p-3 text-center">
+                            <input
+                              type="checkbox"
+                              checked={entry.pole}
+                              disabled={entry.dns}
+                              onChange={e => setPole(driver.id, cup, raceNum, e.target.checked)}
+                              className="w-4 h-4 accent-yellow-400 disabled:opacity-30"
+                            />
                           </td>
                           <td key={`${raceNum}-dns`} className="p-3 text-center">
                             <input

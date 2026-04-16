@@ -26,6 +26,7 @@ export interface RaceResult {
   race_number: 1 | 2
   position: number | null
   dns: boolean
+  pole: boolean
   points: number
   created_at: string
 }
