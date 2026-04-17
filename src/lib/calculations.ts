@@ -5,15 +5,14 @@
 //  - 20 race days total, April 2026 – November 2027
 //  - Each day: NASCAR R1, NASCAR R2 (all rounds) + Classic R1, Classic R2 (from round 2)
 //  - Points: 1st=8, 2nd=6, 3rd=4, 4th=3, 5th=2, 6th=1, DNS=0
-//  - Standings: best 15 of 20 days count PER CUP independently
-//  - DROPS: each cup drops its own 5 worst cup-days (based on that cup's total per day)
-//  - DYNAMIC: drops are applied from race day 16 onward
-//    (days 1–15: no drops; day 16: drop 1; day 17: drop 2; …; day 20: drop 5)
+//  - Standings: max 5 results dropped PER CUP independently
+//  - DROPS: every 4 completed race days, one additional result is dropped
+//    (days 1–3: 0 drops; days 4–7: 1 drop; days 8–11: 2 drops; …; day 20: 5 drops)
 //  - NASCAR & Classic Cup are fully independent championships with independent drops
 // ============================================================
 
 import { Driver, RaceDay, RaceResult, DriverDayResult, DriverStanding, CupStandings } from './types'
-import { Cup, COUNTED_RACE_DAYS } from './constants'
+import { Cup, DROPPED_RACE_DAYS } from './constants'
 
 /**
  * Calculate which race days are dropped for a given driver in a specific cup.
@@ -24,7 +23,7 @@ export function getDroppedDayIds(
   completedDays: number,
   cup: Cup
 ): Set<string> {
-  const toDrop = Math.max(0, completedDays - COUNTED_RACE_DAYS)
+  const toDrop = Math.min(Math.floor(completedDays / 4), DROPPED_RACE_DAYS)
   if (toDrop === 0) return new Set()
 
   const cupTotal = (d: DriverDayResult) => cup === 'nascar' ? d.nascarTotal : d.classicTotal
@@ -91,7 +90,7 @@ export function calculateCupStandings(
     results.filter(r => r.cup === cup).map(r => r.race_day_id)
   )
   const completedDays = raceDays.filter(d => cupResultDayIds.has(d.id)).length
-  const activeDroppingCount = Math.max(0, completedDays - COUNTED_RACE_DAYS)
+  const activeDroppingCount = Math.min(Math.floor(completedDays / 4), DROPPED_RACE_DAYS)
 
   const standings: DriverStanding[] = drivers.map(driver => {
     const dayResults = buildDriverDayResults(driver.id, raceDays, results)
