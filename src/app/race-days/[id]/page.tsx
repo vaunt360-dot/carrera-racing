@@ -118,7 +118,7 @@ export default async function RaceDayDetailPage({ params }: Props) {
                                 <span className="text-white/20 text-xs font-mono">DNS</span>
                               ) : (
                                 <span className="text-white font-mono">
-                                  P{r1.position} <span className="text-white/40 text-xs">({r1.points}P)</span>
+                                  P{r1.position}{r1.pole && <span className="text-yellow-400 ml-1">★</span>} <span className="text-white/40 text-xs">({r1.points}P)</span>
                                 </span>
                               )
                             ) : (
@@ -131,7 +131,7 @@ export default async function RaceDayDetailPage({ params }: Props) {
                                 <span className="text-white/20 text-xs font-mono">DNS</span>
                               ) : (
                                 <span className="text-white font-mono">
-                                  P{r2.position} <span className="text-white/40 text-xs">({r2.points}P)</span>
+                                  P{r2.position}{r2.pole && <span className="text-yellow-400 ml-1">★</span>} <span className="text-white/40 text-xs">({r2.points}P)</span>
                                 </span>
                               )
                             ) : (

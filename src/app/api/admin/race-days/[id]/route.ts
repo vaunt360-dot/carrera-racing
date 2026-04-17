@@ -12,8 +12,15 @@ interface ResultPayload {
   pole: boolean
 }
 
+interface DeleteEntry {
+  driver_id: string
+  cup: Cup
+  race_number: 1 | 2
+}
+
 interface PutBody {
   results: ResultPayload[]
+  toDelete: DeleteEntry[]
   cancelled: boolean
   notes: string
   date?: string
@@ -39,7 +46,7 @@ export async function PUT(
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const { results, cancelled, notes, date } = body
+  const { results, toDelete, cancelled, notes, date } = body
 
   // Update race day
   const updatePayload: Record<string, unknown> = { cancelled, notes: notes || null }
@@ -65,13 +72,26 @@ export async function PUT(
       return NextResponse.json({ error: delError.message }, { status: 500 })
     }
   } else {
-    // Upsert results
-    const { error: upsertError } = await supabase
-      .from('race_results')
-      .upsert(results, { onConflict: 'race_day_id,driver_id,cup,race_number' })
+    // Upsert results with data
+    if (results.length > 0) {
+      const { error: upsertError } = await supabase
+        .from('race_results')
+        .upsert(results, { onConflict: 'race_day_id,driver_id,cup,race_number' })
 
-    if (upsertError) {
-      return NextResponse.json({ error: upsertError.message }, { status: 500 })
+      if (upsertError) {
+        return NextResponse.json({ error: upsertError.message }, { status: 500 })
+      }
+    }
+
+    // Delete empty slots
+    for (const entry of (toDelete ?? [])) {
+      await supabase
+        .from('race_results')
+        .delete()
+        .eq('race_day_id', id)
+        .eq('driver_id', entry.driver_id)
+        .eq('cup', entry.cup)
+        .eq('race_number', entry.race_number)
     }
   }
 

@@ -37,15 +37,15 @@ export default async function AdminRaceDaysPage() {
             const isPast = day.date < today
 
             return (
-              <div key={day.id} className="glass-panel p-5 flex items-center gap-5">
+              <div key={day.id} className="glass-panel p-5 flex items-center gap-4 flex-wrap">
                 {/* Round */}
                 <span className="font-display text-3xl text-white w-12 text-center flex-shrink-0">
                   {day.round_number.toString().padStart(2, '0')}
                 </span>
 
                 {/* Info */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
                     <span className="text-white font-semibold">Runde {day.round_number}</span>
                     {isComplete && <Badge className="bg-green-600/30 text-green-400 border-green-500/30 text-xs">Abgeschlossen</Badge>}
                     {day.cancelled && <Badge variant="outline" className="text-white/30 border-white/10 text-xs">Abgesagt</Badge>}
@@ -59,7 +59,7 @@ export default async function AdminRaceDaysPage() {
                 {/* Edit Button */}
                 <Link
                   href={`/admin/race-days/${day.id}/edit`}
-                  className="px-4 py-2 border border-white/10 rounded-lg text-white/60 text-sm hover:border-racing-red hover:text-white transition-colors font-mono"
+                  className="flex-shrink-0 px-4 py-2 border border-white/10 rounded-lg text-white/60 text-sm hover:border-racing-red hover:text-white transition-colors font-mono whitespace-nowrap"
                 >
                   Bearbeiten →
                 </Link>
