@@ -56,6 +56,41 @@ export async function getRaceDayDetail(id: string): Promise<RaceDayDetail | null
 }
 
 // ---------------------
+// Driver Stats
+// ---------------------
+
+export interface DriverStats {
+  wins: number
+  podiums: number
+  poles: number
+  starts: number
+}
+
+export async function getDriverStats(): Promise<Record<string, DriverStats>> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('race_results')
+    .select('driver_id, position, dns, pole')
+
+  if (error) throw new Error(`Failed to fetch driver stats: ${error.message}`)
+
+  const stats: Record<string, DriverStats> = {}
+
+  for (const r of data ?? []) {
+    if (!stats[r.driver_id]) stats[r.driver_id] = { wins: 0, podiums: 0, poles: 0, starts: 0 }
+    const s = stats[r.driver_id]
+    if (!r.dns && r.position !== null) {
+      s.starts++
+      if (r.position === 1) s.wins++
+      if (r.position <= 3) s.podiums++
+    }
+    if (r.pole) s.poles++
+  }
+
+  return stats
+}
+
+// ---------------------
 // Race Results
 // ---------------------
 
