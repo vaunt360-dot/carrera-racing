@@ -51,7 +51,7 @@ export async function getRaceDayDetail(id: string): Promise<RaceDayDetail | null
   return {
     ...raceDay,
     results: results ?? [],
-    isComplete: (results ?? []).length === 24, // 6 drivers × 4 races
+    isComplete: (results ?? []).length === (raceDay.round_number === 1 ? 12 : 24), // round 1: NASCAR only (12), round 2+: all cups (24)
   }
 }
 
