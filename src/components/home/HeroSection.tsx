@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
 import { RaceDay } from '@/lib/types'
-import { format, differenceInDays } from 'date-fns'
+import { format, differenceInDays, parseISO, startOfDay } from 'date-fns'
 
 interface HeroSectionProps {
   nextRaceDay: RaceDay | null
@@ -12,7 +12,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ nextRaceDay }: HeroSectionProps) {
   const daysUntil = nextRaceDay
-    ? differenceInDays(new Date(nextRaceDay.date), new Date())
+    ? differenceInDays(parseISO(nextRaceDay.date), startOfDay(new Date()))
     : null
 
   return (
