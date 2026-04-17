@@ -121,11 +121,16 @@ export default async function RaceDayDetailPage({ params }: Props) {
                       .map(driver => {
                         const r1 = getResult(cup, 1, driver.id)
                         const r2 = getResult(cup, 2, driver.id)
-                        const total = (r1?.points ?? 0) + (r2?.points ?? 0)
-                        return { driver, r1, r2, total }
+                        const r1base = r1?.dns ? 0 : (r1?.points ?? 0)
+                        const r2base = r2?.dns ? 0 : (r2?.points ?? 0)
+                        const r1pole = (!r1?.dns && r1?.pole) ? 1 : 0
+                        const r2pole = (!r2?.dns && r2?.pole) ? 1 : 0
+                        const total = r1base + r1pole + r2base + r2pole
+                        const poleBonus = r1pole + r2pole
+                        return { driver, r1, r2, total, poleBonus }
                       })
-                      .sort((a, b) => b.total - a.total)
-                      .map(({ driver, r1, r2, total }) => (
+                       .sort((a, b) => b.total - a.total)
+                       .map(({ driver, r1, r2, total, poleBonus }) => (
                         <TableRow key={driver.id} className="border-white/5 hover:bg-white/5">
                           <TableCell className="py-4">
                             <div className="flex items-center gap-3">
@@ -168,9 +173,16 @@ export default async function RaceDayDetailPage({ params }: Props) {
                               <span className="text-white/15 text-xs">–</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-right">
-                            <span className="font-display text-xl text-white">{total}</span>
-                          </TableCell>
+                           <TableCell className="text-right">
+                             {poleBonus > 0 ? (
+                               <span className="font-display text-xl text-white">
+                                 {total - poleBonus}
+                                 <span className="text-yellow-400 text-sm font-mono ml-1">+{poleBonus}</span>
+                               </span>
+                             ) : (
+                               <span className="font-display text-xl text-white">{total}</span>
+                             )}
+                           </TableCell>
                         </TableRow>
                       ))
                     }
