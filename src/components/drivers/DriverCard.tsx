@@ -53,14 +53,14 @@ export function DriverCard({ driver, stats: s }: DriverCardProps) {
       onClick={() => setFlipped(f => !f)}
     >
       <motion.div
-        style={{ transformStyle: 'preserve-3d', position: 'relative' }}
+        style={{ transformStyle: 'preserve-3d', WebkitTransformStyle: 'preserve-3d', position: 'relative' }}
         animate={{ rotateY: flipped ? 180 : 0 }}
         transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}
       >
         {/* ── FRONT ─────────────────────────────────────────── */}
         <div
           className="glass-panel overflow-hidden group hover:border-white/20 transition-all duration-300"
-          style={{ borderColor: `${driver.color}20`, backfaceVisibility: 'hidden' }}
+          style={{ borderColor: `${driver.color}20`, backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
         >
           <div className="h-1 w-full" style={{ backgroundColor: driver.color }} />
 
@@ -95,11 +95,13 @@ export function DriverCard({ driver, stats: s }: DriverCardProps) {
 
         {/* ── BACK ──────────────────────────────────────────── */}
         <div
-          className="glass-panel overflow-hidden absolute inset-0"
+          className="overflow-hidden absolute inset-0 rounded-lg border"
           style={{
             borderColor: `${driver.color}40`,
             backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
+            backgroundColor: '#0f0f0f',
           }}
         >
           <div className="h-1 w-full" style={{ backgroundColor: driver.color }} />
