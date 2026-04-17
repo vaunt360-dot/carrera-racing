@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getRaceDayDetail, getDrivers } from '@/lib/actions'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
@@ -35,16 +36,27 @@ export default async function RaceDayDetailPage({ params }: Props) {
     raceDay.results.find(r => r.cup === cup && r.race_number === raceNum && r.driver_id === driverId)
 
   return (
-    <main className="min-h-screen bg-racing-black pt-24 pb-16">
-      <div className="container mx-auto max-w-5xl px-6">
-        {/* Back */}
-        <Link href="/race-days" className="text-white/40 hover:text-white font-mono text-sm mb-8 block">
-          ← Alle Renntage
-        </Link>
+    <main className="min-h-screen bg-racing-black pb-16">
 
-        {/* Header */}
-        <div className="mb-12">
-          <div className="flex items-center gap-4 mb-3">
+      {/* Hero Banner */}
+      <div className="relative w-full h-64 md:h-80 overflow-hidden">
+        {raceDay.banner_url ? (
+          <Image
+            src={raceDay.banner_url}
+            alt={`Renntag ${raceDay.round_number} Banner`}
+            fill
+            className="object-cover"
+            priority
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900" />
+        )}
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-racing-black via-racing-black/40 to-transparent" />
+
+        {/* Header text on banner */}
+        <div className="absolute bottom-0 left-0 right-0 px-6 pb-8 container mx-auto max-w-5xl">
+          <div className="flex items-center gap-4 mb-2">
             <div className="h-1 w-12 bg-racing-red" />
             <span className="text-racing-red font-mono text-xs uppercase tracking-widest">
               Runde {raceDay.round_number}
@@ -53,15 +65,25 @@ export default async function RaceDayDetailPage({ params }: Props) {
           <h1 className="font-display text-5xl md:text-6xl text-white">
             RENNTAG {raceDay.round_number.toString().padStart(2, '0')}
           </h1>
-          <p className="text-white/60 mt-2 font-mono text-sm">
+          <p className="text-white/60 mt-1 font-mono text-sm">
             {format(new Date(raceDay.date), 'EEEE, d. MMMM yyyy', { locale: de })}
           </p>
+        </div>
+      </div>
 
+      <div className="container mx-auto max-w-5xl px-6 pt-8">
+        {/* Back */}
+        <Link href="/race-days" className="text-white/40 hover:text-white font-mono text-sm mb-8 block">
+          ← Alle Renntage
+        </Link>
+
+        {/* Badges */}
+        <div className="mb-10 flex gap-2 flex-wrap">
           {raceDay.cancelled && (
-            <Badge variant="outline" className="mt-4 text-white/40 border-white/20">Veranstaltung abgesagt</Badge>
+            <Badge variant="outline" className="text-white/40 border-white/20">Veranstaltung abgesagt</Badge>
           )}
           {raceDay.isComplete && (
-            <Badge className="mt-4 bg-green-600/30 text-green-400 border-green-500/30">Alle Ergebnisse eingetragen</Badge>
+            <Badge className="bg-green-600/30 text-green-400 border-green-500/30">Alle Ergebnisse eingetragen</Badge>
           )}
         </div>
 
@@ -117,8 +139,12 @@ export default async function RaceDayDetailPage({ params }: Props) {
                               r1.dns ? (
                                 <span className="text-white/20 text-xs font-mono">DNS</span>
                               ) : (
-                                <span className="text-white font-mono">
-                                  P{r1.position}{r1.pole && <span className="text-yellow-400 ml-1">★</span>} <span className="text-white/40 text-xs">({r1.points}P)</span>
+                                <span className="text-white font-mono inline-flex items-center gap-0.5">
+                                  <span className="inline-block w-4 text-center text-yellow-400 text-xs">
+                                    {r1.pole ? '★' : ''}
+                                  </span>
+                                  P{r1.position}
+                                  <span className="text-white/40 text-xs ml-1">({r1.points}P)</span>
                                 </span>
                               )
                             ) : (
@@ -130,8 +156,12 @@ export default async function RaceDayDetailPage({ params }: Props) {
                               r2.dns ? (
                                 <span className="text-white/20 text-xs font-mono">DNS</span>
                               ) : (
-                                <span className="text-white font-mono">
-                                  P{r2.position}{r2.pole && <span className="text-yellow-400 ml-1">★</span>} <span className="text-white/40 text-xs">({r2.points}P)</span>
+                                <span className="text-white font-mono inline-flex items-center gap-0.5">
+                                  <span className="inline-block w-4 text-center text-yellow-400 text-xs">
+                                    {r2.pole ? '★' : ''}
+                                  </span>
+                                  P{r2.position}
+                                  <span className="text-white/40 text-xs ml-1">({r2.points}P)</span>
                                 </span>
                               )
                             ) : (

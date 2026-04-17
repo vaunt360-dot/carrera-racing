@@ -15,6 +15,7 @@ export interface RaceDay {
   round_number: number
   cancelled: boolean
   notes: string | null
+  banner_url: string | null
   created_at: string
 }
 
