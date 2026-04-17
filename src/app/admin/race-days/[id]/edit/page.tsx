@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getRaceDayDetail, getDrivers } from '@/lib/actions'
 import { EditRaceDayForm } from '@/components/admin/EditRaceDayForm'
-import { BannerGenerator } from '@/components/admin/BannerGenerator'
+import { BannerEditor } from '@/components/admin/BannerEditor'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
@@ -42,7 +42,7 @@ export default async function AdminEditRaceDayPage({ params }: Props) {
         </div>
 
         <div className="space-y-8">
-          <BannerGenerator raceDayId={id} initialBannerUrl={raceDay.banner_url ?? null} />
+          <BannerEditor raceDayId={id} initialBannerUrl={raceDay.banner_url ?? null} />
           <EditRaceDayForm raceDay={raceDay} drivers={drivers} />
         </div>
       </div>
