@@ -171,21 +171,21 @@ export function getSeasonProgression(
   const cupResultDayIds = new Set(results.filter(r => r.cup === cup).map(r => r.race_day_id))
   const completedDays = raceDays.filter(d => cupResultDayIds.has(d.id))
 
-  completedDays.forEach((_, idx) => {
-    const daysUpToNow = dayResults.slice(0, idx + 1)
-    const completedCount = daysUpToNow.length
+  completedDays.forEach((completedDay) => {
+    const dayIndex = dayResults.findIndex(d => d.raceDayId === completedDay.id)
+    const daysUpToNow = dayResults.slice(0, dayIndex + 1)
+    const completedCount = daysUpToNow.filter(d => cupResultDayIds.has(d.raceDayId)).length
     const droppedIds = getDroppedDayIds(daysUpToNow, completedCount, cup)
 
     const points = daysUpToNow
       .filter(d => !droppedIds.has(d.raceDayId))
       .reduce((sum, d) => sum + (cup === 'nascar' ? d.nascarTotal : d.classicTotal), 0)
 
-    const day = completedDays[idx]
     progression.push({
-      round: day.round_number,
-      date: day.date,
+      round: completedDay.round_number,
+      date: completedDay.date,
       points,
-      isDropped: droppedIds.has(day.id),
+      isDropped: droppedIds.has(completedDay.id),
     })
   })
 
