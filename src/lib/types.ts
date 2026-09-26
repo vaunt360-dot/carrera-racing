@@ -17,6 +17,9 @@ export interface RaceDay {
   notes: string | null
   banner_url: string | null
   created_at: string
+  // Computed at read time: position among non-cancelled race days (1-based).
+  // Undefined/0 for cancelled days.
+  effectiveRound?: number
 }
 
 export interface RaceResult {
@@ -37,7 +40,6 @@ export interface DriverDayResult {
   raceDayId: string
   roundNumber: number
   date: string
-  cancelled: boolean
   nascarR1: number
   nascarR2: number
   classicR1: number
@@ -64,9 +66,11 @@ export interface CupStandings {
   standings: DriverStanding[]
   completedDays: number
   activeDroppingCount: number // how many days are currently being dropped
+  totalDays: number // non-cancelled race days that make up the championship
 }
 
 export interface RaceDayDetail extends RaceDay {
   results: RaceResult[]
-  isComplete: boolean // all 24 results entered
+  isComplete: boolean // all results entered for this round
+  effectiveRound: number
 }

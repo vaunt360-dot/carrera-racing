@@ -35,5 +35,6 @@ export const DRIVERS = [
 ] as const
 
 export const TOTAL_RACE_DAYS = 20
-export const COUNTED_RACE_DAYS = 15
-export const DROPPED_RACE_DAYS = 5
+// Percentage of results that are dropped (rounded up to whole race days).
+// Cancelled race days are excluded from the total before this is applied.
+export const DROP_PERCENT = 20

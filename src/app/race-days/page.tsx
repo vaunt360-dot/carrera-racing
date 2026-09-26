@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getRaceDays, getRaceResults } from '@/lib/actions'
+import { getEffectiveRounds } from '@/lib/calculations'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
@@ -14,6 +15,7 @@ export default async function RaceDaysPage() {
   const today = new Date().toISOString().split('T')[0]
 
   const completedDayIds = new Set(results.map(r => r.race_day_id))
+  const effectiveRounds = getEffectiveRounds(raceDays)
 
   return (
     <main className="min-h-screen bg-racing-black pt-24 pb-16">
@@ -38,6 +40,7 @@ export default async function RaceDaysPage() {
               const isComplete = completedDayIds.has(day.id)
               const isPast = day.date < today
               const isNext = !isPast && !isComplete && !day.cancelled
+              const effectiveRound = effectiveRounds.get(day.id)
 
               return (
                 <Link key={day.id} href={`/race-days/${day.id}`}>
@@ -63,7 +66,7 @@ export default async function RaceDaysPage() {
                     {/* Round number */}
                     <div className="text-center w-12 flex-shrink-0">
                       <span className={`font-display text-3xl ${isComplete || isNext ? 'text-white' : 'text-white/30'}`}>
-                        {day.round_number.toString().padStart(2, '0')}
+                        {day.cancelled ? '—' : effectiveRound?.toString().padStart(2, '0')}
                       </span>
                     </div>
 
@@ -71,7 +74,7 @@ export default async function RaceDaysPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-1">
                         <p className={`font-semibold ${isComplete || isNext ? 'text-white' : 'text-white/50'}`}>
-                          Runde {day.round_number}
+                          {day.cancelled ? 'Abgesagt' : `Runde ${effectiveRound}`}
                         </p>
                         {isNext && <Badge className="bg-racing-red text-white text-xs">Nächstes Rennen</Badge>}
                         {day.cancelled && <Badge variant="outline" className="text-white/30 border-white/10 text-xs">Abgesagt</Badge>}

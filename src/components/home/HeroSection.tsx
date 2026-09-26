@@ -89,7 +89,7 @@ export function HeroSection({ nextRaceDay }: HeroSectionProps) {
                 <div>
                   <p className="text-white/50 text-xs uppercase tracking-widest mb-1 font-mono">Nächster Renntag</p>
                   <p className="text-white font-display text-3xl">
-                    RUNDE {nextRaceDay.round_number.toString().padStart(2, '0')}
+                    RUNDE {(nextRaceDay.effectiveRound ?? nextRaceDay.round_number).toString().padStart(2, '0')}
                   </p>
                   <p className="text-white/80 mt-1 text-lg">
                     {format(new Date(nextRaceDay.date), 'dd. MMMM yyyy')}

@@ -5,7 +5,7 @@
 import { createClient } from './supabase/server'
 import { Driver, RaceDay, RaceResult, RaceDayDetail, CupStandings } from './types'
 import { Cup, CUPS } from './constants'
-import { calculateCupStandings } from './calculations'
+import { calculateCupStandings, getEffectiveRoundNumber } from './calculations'
 
 // ---------------------
 // Drivers
@@ -40,18 +40,23 @@ export async function getRaceDays(): Promise<RaceDay[]> {
 export async function getRaceDayDetail(id: string): Promise<RaceDayDetail | null> {
   const supabase = await createClient()
 
-  const [{ data: raceDay, error: rdError }, { data: results, error: rError }] = await Promise.all([
+  const [{ data: raceDay, error: rdError }, { data: results, error: rError }, { data: allDays }] = await Promise.all([
     supabase.from('race_days').select('*').eq('id', id).single(),
     supabase.from('race_results').select('*').eq('race_day_id', id),
+    supabase.from('race_days').select('*').order('round_number', { ascending: true }),
   ])
 
   if (rdError || !raceDay) return null
   if (rError) throw new Error(`Failed to fetch race results: ${rError.message}`)
 
+  const effectiveRound = getEffectiveRoundNumber(allDays ?? [], id)
+
   return {
     ...raceDay,
     results: results ?? [],
-    isComplete: (results ?? []).length === (raceDay.round_number === 1 ? 12 : 24), // round 1: NASCAR only (12), round 2+: all cups (24)
+    effectiveRound,
+    // round 1: NASCAR only (12), round 2+: all cups (24)
+    isComplete: (results ?? []).length === (effectiveRound === 1 ? 12 : 24),
   }
 }
 
@@ -117,13 +122,12 @@ export async function getDriverStats(): Promise<Record<string, DriverStats>> {
   if (completedDays >= 2) {
     for (const ds of nascar.standings) {
       const classicDs = classic.standings.find(s => s.driver.id === ds.driver.id)
-      const days = ds.dayResults.filter((_, i) => i < completedDays)
-      const last = days[days.length - 1]
-      const prev = days[days.length - 2]
+      const last = ds.dayResults[ds.dayResults.length - 1]
+      const prev = ds.dayResults[ds.dayResults.length - 2]
       const lastN = last?.nascarTotal ?? 0
       const prevN = prev?.nascarTotal ?? 0
-      const lastC = classicDs?.dayResults[days.length - 1]?.classicTotal ?? 0
-      const prevC = classicDs?.dayResults[days.length - 2]?.classicTotal ?? 0
+      const lastC = classicDs?.dayResults[classicDs.dayResults.length - 1]?.classicTotal ?? 0
+      const prevC = classicDs?.dayResults[classicDs.dayResults.length - 2]?.classicTotal ?? 0
       trendMap[ds.driver.id] = (lastN + lastC) - (prevN + prevC)
     }
   }
@@ -255,20 +259,15 @@ export async function getCupStandings(cup: Cup): Promise<CupStandings> {
 // ---------------------
 
 export async function getNextRaceDay(): Promise<RaceDay | null> {
-  const supabase = await createClient()
   const today = new Date().toISOString().split('T')[0]
+  const raceDays = await getRaceDays()
 
-  const { data, error } = await supabase
-    .from('race_days')
-    .select('*')
-    .gte('date', today)
-    .eq('cancelled', false)
-    .order('date', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  const next = raceDays
+    .filter(d => !d.cancelled && d.date >= today)
+    .sort((a, b) => a.date.localeCompare(b.date))[0]
 
-  if (error) throw new Error(`Failed to fetch next race day: ${error.message}`)
-  return data
+  if (!next) return null
+  return { ...next, effectiveRound: getEffectiveRoundNumber(raceDays, next.id) }
 }
 
 // ---------------------

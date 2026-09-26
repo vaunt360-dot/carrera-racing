@@ -25,7 +25,7 @@ export default async function StandingsPage() {
           </div>
           <h1 className="font-display text-6xl md:text-7xl text-white">WM-STAND</h1>
           <p className="text-white/40 mt-3 font-mono text-sm">
-            Saison 2026–2027 · {standings.nascar.completedDays} von 20 Renntagen absolviert
+            Saison 2026–2027 · {standings.nascar.completedDays} von {standings.nascar.totalDays} Renntagen absolviert
             {standings.nascar.activeDroppingCount > 0 && (
               <span className="text-racing-red/80"> · {standings.nascar.activeDroppingCount} Streichungen aktiv</span>
             )}

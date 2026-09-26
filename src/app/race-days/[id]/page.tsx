@@ -43,7 +43,7 @@ export default async function RaceDayDetailPage({ params }: Props) {
         {raceDay.banner_url ? (
           <Image
             src={raceDay.banner_url}
-            alt={`Renntag ${raceDay.round_number} Banner`}
+            alt={`Renntag ${raceDay.effectiveRound} Banner`}
             fill
             className="object-cover"
             priority
@@ -59,11 +59,11 @@ export default async function RaceDayDetailPage({ params }: Props) {
           <div className="flex items-center gap-4 mb-2">
             <div className="h-1 w-12 bg-racing-red" />
             <span className="text-racing-red font-mono text-xs uppercase tracking-widest">
-              Runde {raceDay.round_number}
+              {raceDay.cancelled ? 'Veranstaltung abgesagt' : `Runde ${raceDay.effectiveRound}`}
             </span>
           </div>
           <h1 className="font-display text-5xl md:text-6xl text-white">
-            RENNTAG {raceDay.round_number.toString().padStart(2, '0')}
+            {raceDay.cancelled ? 'ABGESAGT' : `RENNTAG ${raceDay.effectiveRound.toString().padStart(2, '0')}`}
           </h1>
           <p className="text-white/60 mt-1 font-mono text-sm">
             {format(new Date(raceDay.date), 'EEEE, d. MMMM yyyy', { locale: de })}

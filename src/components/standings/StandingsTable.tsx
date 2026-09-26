@@ -27,14 +27,11 @@ function formDotColor(pts: number): string {
   return 'bg-white/30'                  // P4–P6
 }
 
-function FormDots({ dayResults, cup, completedDays }: {
+function FormDots({ dayResults, cup }: {
   dayResults: DriverDayResult[]
   cup: Cup
-  completedDays: number
 }) {
-  const last5 = dayResults
-    .filter((_, i) => i < completedDays)
-    .slice(-5)
+  const last5 = dayResults.slice(-5)
 
   return (
     <div className="flex items-center gap-1">
@@ -53,12 +50,11 @@ function FormDots({ dayResults, cup, completedDays }: {
   )
 }
 
-function TrendArrow({ dayResults, cup, completedDays }: {
+function TrendArrow({ dayResults, cup }: {
   dayResults: DriverDayResult[]
   cup: Cup
-  completedDays: number
 }) {
-  const completed = dayResults.filter((_, i) => i < completedDays)
+  const completed = dayResults
   if (completed.length < 2) return <span className="text-white/20 font-mono text-xs">–</span>
 
   const last = completed[completed.length - 1]
@@ -88,9 +84,7 @@ export function StandingsTable({ standings, view }: StandingsTableProps) {
 
   const leaderPoints = driverStandings[0]?.cupPoints ?? 0
 
-  const completedDaysList = driverStandings[0]
-    ? driverStandings[0].dayResults.filter((_, i) => i < completedDays)
-    : []
+  const completedDaysList = driverStandings[0] ? driverStandings[0].dayResults : []
 
   // ── COMPACT VIEW ──────────────────────────────────────────
   if (view === 'compact') {
@@ -136,10 +130,10 @@ export function StandingsTable({ standings, view }: StandingsTableProps) {
                     </div>
                   </TableCell>
                   <TableCell className="py-4 text-center">
-                    <FormDots dayResults={ds.dayResults} cup={cup} completedDays={completedDays} />
+                    <FormDots dayResults={ds.dayResults} cup={cup} />
                   </TableCell>
                   <TableCell className="py-4 text-center">
-                    <TrendArrow dayResults={ds.dayResults} cup={cup} completedDays={completedDays} />
+                    <TrendArrow dayResults={ds.dayResults} cup={cup} />
                   </TableCell>
                   <TableCell className="text-right py-4">{gap}</TableCell>
                   <TableCell className="text-right py-4">
@@ -213,7 +207,7 @@ export function StandingsTable({ standings, view }: StandingsTableProps) {
                   </div>
                 </div>
               </TableCell>
-              {ds.dayResults.filter((_, i) => i < completedDays).map((dr) => {
+              {ds.dayResults.map((dr) => {
                 const isDropped = ds.droppedDayIds.has(dr.raceDayId)
                 const cupPoints = standings.cup === 'nascar' ? dr.nascarTotal : dr.classicTotal
                 return (
@@ -225,7 +219,7 @@ export function StandingsTable({ standings, view }: StandingsTableProps) {
                         ? 'bg-racing-red/20 text-white'
                         : 'text-white/30'
                     }`}>
-                      {dr.cancelled ? '–' : cupPoints}
+                      {cupPoints}
                     </span>
                   </TableCell>
                 )

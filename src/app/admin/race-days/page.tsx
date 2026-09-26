@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getRaceDays, getRaceResults } from '@/lib/actions'
+import { getEffectiveRounds } from '@/lib/calculations'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
@@ -14,6 +15,7 @@ export default async function AdminRaceDaysPage() {
 
   const completedDayIds = new Set(results.map(r => r.race_day_id))
   const today = new Date().toISOString().split('T')[0]
+  const effectiveRounds = getEffectiveRounds(raceDays)
 
   return (
     <main className="min-h-screen bg-racing-black pt-24 pb-16">
@@ -35,18 +37,19 @@ export default async function AdminRaceDaysPage() {
           {raceDays.map((day) => {
             const isComplete = completedDayIds.has(day.id)
             const isPast = day.date < today
+            const effectiveRound = effectiveRounds.get(day.id)
 
             return (
               <div key={day.id} className="glass-panel p-5 flex items-center gap-4 flex-wrap">
                 {/* Round */}
                 <span className="font-display text-3xl text-white w-12 text-center flex-shrink-0">
-                  {day.round_number.toString().padStart(2, '0')}
+                  {day.cancelled ? '—' : effectiveRound?.toString().padStart(2, '0')}
                 </span>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className="text-white font-semibold">Runde {day.round_number}</span>
+                    <span className="text-white font-semibold">{day.cancelled ? 'Abgesagt' : `Runde ${effectiveRound}`}</span>
                     {isComplete && <Badge className="bg-green-600/30 text-green-400 border-green-500/30 text-xs">Abgeschlossen</Badge>}
                     {day.cancelled && <Badge variant="outline" className="text-white/30 border-white/10 text-xs">Abgesagt</Badge>}
                     {isPast && !isComplete && !day.cancelled && <Badge variant="outline" className="text-yellow-500/60 border-yellow-500/30 text-xs">Ausstehend</Badge>}

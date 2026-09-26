@@ -10,7 +10,7 @@ const TICKER_ITEMS = [
   '6 PILOTEN',
   '20 RENNTAGE',
   'PUNKTE: 8·6·4·3·2·1',
-  'STREICHUNGSREGEL: BESTE 15 VON 20',
+  'STREICHUNGSREGEL: 20% AUFGERUNDET',
 ]
 
 export function MarqueeTicker() {

@@ -34,7 +34,7 @@ export default async function AdminEditRaceDayPage({ params }: Props) {
             <span className="text-racing-red font-mono text-xs uppercase tracking-widest">Admin · Bearbeiten</span>
           </div>
           <h1 className="font-display text-5xl text-white">
-            RUNDE {raceDay.round_number.toString().padStart(2, '0')}
+            {raceDay.cancelled ? 'ABGESAGT' : `RUNDE ${raceDay.effectiveRound.toString().padStart(2, '0')}`}
           </h1>
           <p className="text-white/50 font-mono text-sm mt-2">
             {format(new Date(raceDay.date), 'EEEE, d. MMMM yyyy', { locale: de })}

@@ -203,7 +203,7 @@ export function EditRaceDayForm({ raceDay, drivers }: EditRaceDayFormProps) {
       </div>
 
       {/* Results per cup */}
-      {!cancelled && CUPS.filter(cup => !(cup === 'classic' && raceDay.round_number === 1)).map(cup => (
+      {!cancelled && CUPS.filter(cup => !(cup === 'classic' && raceDay.effectiveRound === 1)).map(cup => (
         <div key={cup} className="space-y-4">
           {/* Cup label */}
           <div className="px-1">

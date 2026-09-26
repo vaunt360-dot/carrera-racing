@@ -31,7 +31,7 @@ export function StandingsSummary({ standings }: StandingsSummaryProps) {
 
         <div className="grid md:grid-cols-2 gap-8">
           {cups.map((cup, cupIdx) => {
-            const { standings: driverStandings, completedDays } = standings[cup]
+            const { standings: driverStandings, completedDays, totalDays } = standings[cup]
             const top3 = driverStandings.slice(0, 3)
             const leader = top3[0]
 
@@ -50,7 +50,7 @@ export function StandingsSummary({ standings }: StandingsSummaryProps) {
                     <h3 className="font-display text-2xl text-white">{CUP_LABELS[cup]}</h3>
                     <p className="text-white/40 text-sm mt-1 font-mono">{CUP_SUBTITLES[cup]}</p>
                   </div>
-                  <span className="text-white/30 font-mono text-xs">{completedDays}/20</span>
+                  <span className="text-white/30 font-mono text-xs">{completedDays}/{totalDays}</span>
                 </div>
 
                 {/* Top 3 */}
