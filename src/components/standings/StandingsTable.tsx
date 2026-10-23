@@ -138,7 +138,6 @@ export function StandingsTable({ standings, view }: StandingsTableProps) {
                   <TableCell className="text-right py-4">{gap}</TableCell>
                   <TableCell className="text-right py-4">
                     <span className="font-display text-2xl text-white">{ds.cupPoints}</span>
-                    <span className="text-white/30 text-xs font-mono ml-1">({ds.totalRawPoints})</span>
                   </TableCell>
                 </motion.tr>
               )
@@ -230,7 +229,6 @@ export function StandingsTable({ standings, view }: StandingsTableProps) {
               </TableCell>
               <TableCell className="text-right py-4">
                 <span className="font-display text-xl text-white">{ds.cupPoints}</span>
-                <span className="text-white/30 text-xs font-mono ml-1">({ds.totalRawPoints})</span>
               </TableCell>
             </motion.tr>
           ))}
