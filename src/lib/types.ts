@@ -47,6 +47,8 @@ export interface DriverDayResult {
   nascarTotal: number
   classicTotal: number
   dayTotal: number // all 4 races combined (used for drop calculation)
+  nascarHasResult: boolean // driver has ≥1 result row (incl. DNS) in this cup
+  classicHasResult: boolean
 }
 
 export interface DriverStanding {

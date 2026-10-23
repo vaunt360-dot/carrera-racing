@@ -47,9 +47,13 @@ export function getDroppedDayIds(
 
   const cupTotal = (d: DriverDayResult) => cup === 'nascar' ? d.nascarTotal : d.classicTotal
 
-  // Only consider days where the driver actually scored points in this cup.
+  // A day counts as droppable if the driver actually has a result for this cup,
+  // including DNS (0 points). Only days with no result at all are excluded.
+  const hasResult = (d: DriverDayResult) =>
+    cup === 'nascar' ? d.nascarHasResult : d.classicHasResult
+
   const sorted = [...dayResults]
-    .filter(d => cupTotal(d) > 0)
+    .filter(hasResult)
     .sort((a, b) => cupTotal(a) - cupTotal(b))
 
   return new Set(sorted.slice(0, toDrop).map(d => d.raceDayId))
@@ -95,6 +99,8 @@ export function buildDriverDayResults(
         nascarTotal: nascarR1 + nascarR2,
         classicTotal: classicR1 + classicR2,
         dayTotal: nascarR1 + nascarR2 + classicR1 + classicR2,
+        nascarHasResult: dayResults.some(r => r.cup === 'nascar'),
+        classicHasResult: dayResults.some(r => r.cup === 'classic'),
       }
     })
 }
